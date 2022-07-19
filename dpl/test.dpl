@@ -1,0 +1,78 @@
+%include inc.dpl
+
+template template1 {
+	say temp1
+}
+
+template template2 {
+	say arg1="%"
+	say arg2="%"
+	say arg1 (again)="%1%"
+	say arg1 (again)="%1%"
+	say arg2 (again)="%2%"
+}
+
+# global comment
+
+$global_var = 2137; # another global comment
+
+function start()
+{
+	test();
+	raw
+	{
+		say raw
+	}
+	raw {
+		say -> "%" <-
+	} % ("test");
+	# local comment
+	template1(); #another local comment
+	template2("Hello", "friends!");
+}
+
+$temp = 0;
+function tick()
+{
+	$temp += 1;
+	$ret = foo($temp);
+	if($temp>=200)
+	{
+		$temp = 0;
+	}
+	print("%", $ret);
+}
+
+function foo(bar)
+{
+	if($global_var > 5)
+	{
+		print("gv > 5 | gv=%", $global_var);
+	}
+	if($global_var >= 5)
+	{
+		print("gv >= 5 | gv=%", $global_var);
+	}
+	if($global_var < 5)
+	{
+		print("gv < 5 | gv=%", $global_var);
+	}
+	if($global_var <= 5)
+	{
+		print("gv <= 5 | gv=%", $global_var);
+	}
+	if($global_var == 5)
+	{
+		print("gv == 5 | gv=%", $global_var);
+	}
+	if($global_var != 5)
+	{
+		print("gv != 5 | gv=%", $global_var);
+	}
+
+	unless($global_var < 5)
+	{
+		print("!(gv < 5) -> gv >= 5 | gv=%", $global_var);
+	}
+	yield 7 + $bar;
+}

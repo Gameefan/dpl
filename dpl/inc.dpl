@@ -1,0 +1,4 @@
+function test()
+{
+	print("This in a function from the included file");
+}
