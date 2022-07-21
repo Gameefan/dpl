@@ -90,7 +90,8 @@ const char* Preprocessor::run(const char* data)
 			}
 			if (!is_skipping) {
 				ret[write_ptr++] = c;
-				ret[write_ptr] = 0;
+				ret[write_ptr] = '\n';
+				ret[write_ptr + 1] = 0;
 			}
 		}
 	} while (data[++ptr] != 0);
