@@ -143,7 +143,7 @@ Preprocessor::PreprocessorParsingResult Preprocessor::parse_preprocessor_instruc
 	if (strcmp(argv[0], "include") == 0)
 	{
 		assert(argc == 2);
-		ret.text_to_place = FileLoader::load_file(argv[1]);
+		ret.text_to_place = run(FileLoader::load_file(argv[1]));
 		return ret;
 	}
 	return {};
