@@ -666,6 +666,16 @@ std::vector<const char*> CodeGenerator::generate_function_call(FunctionCall* cal
         return NativeFunctions::score(call);
     }
 
+    if (strcmp(call->callee(), "static_loop") == 0)
+    {
+        ErrorReporter::assert_or_error(call->params().size() >= 2, call->token(), "Not enough parameters");
+        ErrorReporter::assert_or_error(call->params()[0].literal->is<TextLiteral>(), call->token(), "First parameter must be a text literal");
+        FunctionInformation* info = function_info_from_identifier(call->params()[0].literal->as<TextLiteral>()->value());
+        ErrorReporter::assert_or_error(info, call->token(), "The target function doesn't exist");
+        assert(info);
+        return NativeFunctions::static_loop(call, info->params);
+    }
+
     FunctionInformation* info = function_info_from_identifier(call->callee());
 
     if (!info)

@@ -29,6 +29,12 @@ function start()
 	# local comment
 	template1(); #another local comment
 	template2("Hello", "friends!");
+	static_loop("loop_me", 15, 123);
+}
+
+function loop_me(loop_arg, other_arg)
+{
+	print("%, %", $loop_arg, $other_arg);
 }
 
 $temp = 0;
