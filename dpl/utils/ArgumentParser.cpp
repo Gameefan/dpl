@@ -10,35 +10,51 @@ bool ArgumentParser::run(int argc, char** argv)
 		const char* arg = argv[i];
 		size_t arg_len = strlen(arg);
 		if (arg[0] == '-') {
-			assert(arg_len == 2);
-			switch (arg[1])
+			if (arg_len == 2) {
+				switch (arg[1])
+				{
+				case 't':
+					m_dump_tokens = true;
+					break;
+				case 'a':
+					m_dump_ast = true;
+					break;
+				case 'T':
+					m_dump_ast_tokens = true;
+					break;
+				case 'o':
+					m_optimize_ast = true;
+					break;
+				case 'O':
+					m_dump_optimized_ast = true;
+					break;
+				case 'h':
+					show_help(argv[0]);
+					return false;
+				default:
+					printf("Error: Found unknown argument: %s\n", arg);
+					break;
+				}
+			}
+			else if (strcmp(arg, "--help") == 0)
 			{
-			case 't':
-				assert(!m_dump_tokens);
-				m_dump_tokens = true;
-				break;
-			case 'a':
-				assert(!m_dump_ast);
-				m_dump_ast = true;
-				break;
-			case 'T':
-				assert(!m_dump_ast_tokens);
-				m_dump_ast_tokens = true;
-				break;
-			case 'o':
-				assert(!m_optimize_ast);
-				m_optimize_ast = true;
-				break;
-			case 'O':
-				assert(!m_dump_optimized_ast);
-				m_dump_optimized_ast = true;
-				break;
-			case 'h':
 				show_help(argv[0]);
 				return false;
-			default:
+			}
+			else if (strcmp(arg, "--dump-tokens") == 0)
+			{
+				m_dump_tokens = true;
+			}
+			else if (strcmp(arg, "--dump-ast") == 0)
+			{
+				m_dump_ast = true;
+			}
+			else if (strcmp(arg, "--dump-ast-tokens") == 0)
+			{
+				m_dump_ast_tokens = true;
+			}
+			else {
 				printf("Error: Found unknown argument: %s\n", arg);
-				break;
 			}
 		}
 		else {
