@@ -73,10 +73,10 @@ void ArgumentParser::show_help(const char* progname)
 	printf("Usage: %s [options]... <file>\n", progname);
 	printf("Transpiles .dpl files to .mcfunction files and puts them into a zip archive for easy addition to a Minecraft world.\n");
 	printf("\n");
-	printf("\t-t\tDump the lexer output\n");
-	printf("\t-a\tDump the parser output\n");
-	printf("\t-T\tDump the AST tokens when dumping parser output\n");
-	printf("\t-o\tOptimize the parsed AST\n");
-	printf("\t-O\tDump the optimized AST\n");
-	printf("\t-h\tShow this help message\n");
+	printf("\t-t, --dump-tokens\n\t\tDump the lexer output\n");
+	printf("\t-a, --dump-ast\n\t\tDump the parser output\n");
+	printf("\t-T, --dump-ast-tokens\n\t\tDump the AST tokens when dumping parser output\n");
+	printf("\t-o\n\t\tOptimize the parsed AST\n");
+	printf("\t-O\n\t\tDump the optimized AST\n");
+	printf("\t-h, --help\n\t\tShow this help message\n");
 }
