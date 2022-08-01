@@ -13,6 +13,15 @@
 
 const char* FileLoader::load_file(const char* path)
 {
+    for (const char* file : s_included_files)
+    {
+        if (strcmp(file, path) == 0)
+        {
+            // Don't include the file again to avoid name conflicts
+            return "";
+        }
+    }
+    s_included_files.push_back(strdup(path));
     if (access(path, F_OK) != 0)
     {
         printf("Error: Unable to load file %s, aborting compilation", path);
