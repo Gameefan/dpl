@@ -24,31 +24,11 @@ ASTNode* Optimizer::run(ASTNode* node)
 			return node;
 		}
 	}
-	if (node->is<AddExpression>())
-	{
-		if (can_be_optimized(node)) return optimize_math_expression(node->as<Expression>());
-		else return optimize_children(node);
-	}
-	if (node->is<SubtractExpression>())
-	{
-		if (can_be_optimized(node)) return optimize_math_expression(node->as<Expression>());
-		else return optimize_children(node);
-	}
-	if (node->is<MultiplyExpression>())
-	{
-		if (can_be_optimized(node)) return optimize_math_expression(node->as<Expression>());
-		else return optimize_children(node);
-	}
-	if (node->is<DivideExpression>())
-	{
-		if (can_be_optimized(node)) return optimize_math_expression(node->as<Expression>());
-		else return optimize_children(node);
-	}
-	if (node->is<ModuloExpression>())
-	{
-		if (can_be_optimized(node)) return optimize_math_expression(node->as<Expression>());
-		else return optimize_children(node);
-	}
+	if (node->is<AddExpression>()) return optimize_math_expression(node->as<Expression>());
+	if (node->is<SubtractExpression>()) return optimize_math_expression(node->as<Expression>());
+	if (node->is<MultiplyExpression>()) return optimize_math_expression(node->as<Expression>());
+	if (node->is<DivideExpression>()) return optimize_math_expression(node->as<Expression>());
+	if (node->is<ModuloExpression>()) return optimize_math_expression(node->as<Expression>());
 	if (node->is<Expression>())
 	{
 		// FIXME: Find a better way to check it is just a plain Expression
@@ -76,38 +56,90 @@ ASTNode* Optimizer::optimize_children(ASTNode* node)
 	return node;
 }
 
-NumericLiteral* Optimizer::optimize_math_expression(Expression* expr)
+Expression* Optimizer::optimize_math_expression(Expression* expr)
 {
+	if (expr->children().size() < 2)
+	{
+		return expr;
+	}
+
 	if (expr->is<NumericLiteral>()) return expr->as<NumericLiteral>();
-	NumericLiteral* lit1 = optimize_math_expression(expr->children()[0]->as<Expression>());
-	NumericLiteral* lit2 = optimize_math_expression(expr->children()[1]->as<Expression>());
-	int value = 0;
+	Expression* lit1 = optimize_math_expression(expr->children()[0]->as<Expression>());
+	Expression* lit2 = optimize_math_expression(expr->children()[1]->as<Expression>());
+
+	// Both expressions are literals
+	if (lit1->is<NumericLiteral>() && lit2->is<NumericLiteral>()) {
+		NumericLiteral* num1 = dynamic_cast<NumericLiteral*>(lit1);
+		NumericLiteral* num2 = dynamic_cast<NumericLiteral*>(lit2);
+		int value = 0;
+		if (expr->is<AddExpression>())
+		{
+			value = num1->value() + num2->value();
+		}
+		else if (expr->is<SubtractExpression>())
+		{
+			value = num1->value() - num2->value();
+		}
+		else if (expr->is<MultiplyExpression>())
+		{
+			value = num1->value() * num2->value();
+		}
+		else if (expr->is<DivideExpression>())
+		{
+			value = num1->value() / num2->value();
+		}
+		else if (expr->is<ModuloExpression>())
+		{
+			value = num1->value() % num2->value();
+		}
+		else
+		{
+			ErrorReporter::report_internal_error(expr->token(), "I don't know how to optimize this mathematical expression");
+		}
+		NumericLiteral* ret = new NumericLiteral(value);
+		return ret;
+	}
+
+	// At least one of the expressions isn't a literal
 	if (expr->is<AddExpression>())
 	{
-		value = lit1->value() + lit2->value();
+		AddExpression* ret = new AddExpression();
+		ret->add_child(lit1);
+		ret->add_child(lit2);
+		return ret;
 	}
 	else if (expr->is<SubtractExpression>())
 	{
-		value = lit1->value() - lit2->value();
+		SubtractExpression* ret = new SubtractExpression();
+		ret->add_child(lit1);
+		ret->add_child(lit2);
+		return ret;
 	}
 	else if (expr->is<MultiplyExpression>())
 	{
-		value = lit1->value() * lit2->value();
+		MultiplyExpression* ret = new MultiplyExpression();
+		ret->add_child(lit1);
+		ret->add_child(lit2);
+		return ret;
 	}
 	else if (expr->is<DivideExpression>())
 	{
-		value = lit1->value() / lit2->value();
+		DivideExpression* ret = new DivideExpression();
+		ret->add_child(lit1);
+		ret->add_child(lit2);
+		return ret;
 	}
 	else if (expr->is<ModuloExpression>())
 	{
-		value = lit1->value() % lit2->value();
+		ModuloExpression* ret = new ModuloExpression();
+		ret->add_child(lit1);
+		ret->add_child(lit2);
+		return ret;
 	}
 	else
 	{
 		ErrorReporter::report_internal_error(expr->token(), "I don't know how to optimize this mathematical expression");
 	}
-	NumericLiteral* ret = new NumericLiteral(value);
-	return ret;
 }
 
 bool Optimizer::can_be_optimized(ASTNode* node)
