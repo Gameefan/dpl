@@ -1,11 +1,13 @@
 #include "Exporter.h"
 #include <filesystem>
-#include <direct.h>
 #include <cstdlib>
 #include "../utils/ErrorReporter.h"
 
 #ifdef _WIN32
+#include <direct.h>
 #define chdir _chdir
+#else
+#include <unistd.h>
 #endif
 
 void Exporter::run(std::vector<CodeGeneratorResult> code)
@@ -15,12 +17,20 @@ void Exporter::run(std::vector<CodeGeneratorResult> code)
 	{
 		char* tmp = strdup(cgr.filename);
 		char* context = nullptr;
+#ifdef _WIN32
 		char* token = strtok_s(tmp, "/", &context);
+#else
+		char* token = strtok_r(tmp, "/", &context);
+#endif
 		Directory* target_dir = root_dir;
 		while (token)
 		{
 			const char* name = token;
+#ifdef _WIN32
 			token = strtok_s(nullptr, "/", &context);
+#else
+			token = strtok_r(nullptr, "/", &context);
+#endif
 			if (!token) {
 				// This is a file
 				target_dir->files.push_back(new File({ name, cgr.filename, cgr.lines }));

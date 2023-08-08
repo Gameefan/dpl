@@ -4,11 +4,14 @@
 #include <cassert>
 #include <sys/stat.h>
 #include <cstdlib>
+#include <cstring>
 
 #ifdef _WIN32
 #include <io.h>
 #define F_OK 0
 #define access _access
+#else
+#include <unistd.h>
 #endif
 
 const char* FileLoader::load_file(const char* path)

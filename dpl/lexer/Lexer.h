@@ -3,6 +3,8 @@
 #include <cctype>
 #include "LexerToken.h"
 #include <cassert>
+#include <cstdlib>
+#include <cstdio>
 
 enum class LexerState
 {

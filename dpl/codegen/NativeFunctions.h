@@ -1,8 +1,9 @@
 #pragma once
 #include "../parser/AST.h"
 #include "../utils/ErrorReporter.h"
+#include <cstring>
 
-static class NativeFunctions {
+class NativeFunctions {
 public:
 	static std::vector<const char*> print(FunctionCall* call)
 	{

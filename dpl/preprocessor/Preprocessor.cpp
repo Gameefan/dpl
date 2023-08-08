@@ -113,12 +113,20 @@ Preprocessor::PreprocessorParsingResult Preprocessor::parse_preprocessor_instruc
 	char* argv[3];
 	int argc = 0;
 	char* context = nullptr;
+#ifdef _WIN32
 	char* token = strtok_s(tmp, " ", &context);
+#else
+	char* token = strtok_r(tmp, " ", &context);
+#endif
 	while (token)
 	{
 		//printf(" - %s\n", token);
 		argv[argc++] = token;
+#ifdef _WIN32
 		token = strtok_s(nullptr, " ", &context);
+#else
+		token = strtok_r(nullptr, " ", &context);
+#endif
 	}
 	assert(argc > 0);
 	if (strcmp(argv[0], "define")==0)

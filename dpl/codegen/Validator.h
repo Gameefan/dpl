@@ -2,6 +2,7 @@
 #include "../parser/ASTNode.h"
 #include "../parser/AST.h"
 #include "../utils/ErrorReporter.h"
+#include <cstring>
 
 class Validator {
 public:

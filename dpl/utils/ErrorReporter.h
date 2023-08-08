@@ -1,8 +1,11 @@
 #pragma once
 #include "../lexer/LexerToken.h"
 #include <cstdio>
+#include <cerrno>
+#include <cstring>
+#include <cstdlib>
 
-static struct LineInfo {
+struct LineInfo {
 	size_t line;
 	size_t character;
 	const char* this_line;

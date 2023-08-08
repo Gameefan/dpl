@@ -1,5 +1,6 @@
 #pragma once
 #include "ASTNode.h"
+#include <cstdio>
 
 class Program : public ASTNode {
 public:

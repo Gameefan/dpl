@@ -792,7 +792,11 @@ std::vector<const char*> CodeGenerator::generate_raw_statement(RawStatement* raw
     {
         char* context = nullptr;
         char* tmp = (char*)raw_data;
-        char* token = strtok_s(tmp, "\n", &context);
+#ifdef _WIN32
+	char* token = strtok_s(tmp, "\n", &context);
+#else
+        char* token = strtok_r(tmp, "\n", &context);
+#endif
         while (token)
         {
             const char* trimmed = trim_line(strdup(token));
@@ -844,7 +848,11 @@ std::vector<const char*> CodeGenerator::generate_raw_statement(RawStatement* raw
                 assert(index < 512);
             }
             lines.push_back(strdup(text));
+#ifdef _WIN32
             token = strtok_s(nullptr, "\n", &context);
+#else
+            token = strtok_r(nullptr, "\n", &context);
+#endif
         }
     }
     return lines;
