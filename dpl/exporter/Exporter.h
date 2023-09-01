@@ -18,8 +18,12 @@ struct Directory {
 
 class Exporter {
 public:
+	Exporter(const char* package_name)
+		: m_package_name(package_name)
+	{}
 	void run(std::vector<CodeGeneratorResult> code);
 private:
 	void create_directory(Directory* dir);
 	void create_files(std::vector<CodeGeneratorResult> files);
+	const char* m_package_name = "dpl";
 };

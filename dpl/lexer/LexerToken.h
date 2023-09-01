@@ -8,6 +8,7 @@
 	__ENUM(SelectorLiteral) \
 	__ENUM(TextLiteral) \
 	__ENUM(Template) \
+	__ENUM(ExternDeclaration) \
 	__ENUM(Function) \
 	__ENUM(FunctionCall) \
 	__ENUM(ArgsStart) \

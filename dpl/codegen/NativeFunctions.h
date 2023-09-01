@@ -26,7 +26,7 @@ public:
 				assert(call->params().size() >= ++current_arg);
 				FunctionCall::Param param = call->params()[current_arg];
 				if (param.identifier) {
-					output_ptr += sprintf(text + output_ptr, "{\"score\":{\"name\":\"%s\",\"objective\":\"dpl_variables\"},\"color\":\"white\"}", param.identifier);
+					output_ptr += sprintf(text + output_ptr, "{\"score\":{\"name\":\"%s\",\"objective\":\"%s_dpl_vars\"},\"color\":\"white\"}", param.identifier, call->package_name());
 				}
 				else if (param.literal->is<TextLiteral>()) {
 					output_ptr += sprintf(text + output_ptr, "{\"text\":\"%s\",\"color\":\"white\"}", param.literal->as<TextLiteral>()->value());
@@ -56,7 +56,7 @@ public:
 		const char* selector = call->params()[0].literal->as<SelectorLiteral>()->value();
 		const char* objective = call->params()[1].literal->as<TextLiteral>()->value();
 		char text[512];
-		sprintf(text, "scoreboard players operation __yield__ dpl_variables = %s %s", selector, objective);
+		sprintf(text, "scoreboard players operation __yield__ %s_dpl_vars = %s %s", call->package_name(), selector, objective);
 		return { strdup(text) };
 	}
 	static std::vector<const char*> static_loop(FunctionCall* call, std::vector<const char*> params)
@@ -77,7 +77,7 @@ public:
 				char* line = (char*)malloc(64);
 				ErrorReporter::assert_or_internal_error(line, call->token(), "Failed to malloc");
 				assert(line);
-				sprintf(line, "scoreboard players set %s dpl_variables %d", params[0], loop_index);
+				sprintf(line, "scoreboard players set %s %s_dpl_vars %d", params[0], call->package_name(), loop_index);
 				lines.push_back(line);
 			}
 			for (size_t i = 2; i < call->params().size(); i++)
@@ -90,7 +90,8 @@ public:
 					char* line = (char*)malloc(64);
 					ErrorReporter::assert_or_internal_error(line, call->token(), "Failed to malloc");
 					assert(line);
-					sprintf(line, "scoreboard players operation %s dpl_variables = %s dpl_variables", param, value.identifier);
+					// FIXME: The last package name should be the local package
+					sprintf(line, "scoreboard players operation %s %s_dpl_vars = %s %s_dpl_vars", param, call->package_name(), value.identifier, call->package_name());
 					lines.push_back(line);
 					continue;
 				}
@@ -99,7 +100,7 @@ public:
 					char* line = (char*)malloc(64);
 					ErrorReporter::assert_or_internal_error(line, call->token(), "Failed to malloc");
 					assert(line);
-					sprintf(line, "scoreboard players set %s dpl_variables %d", param, value.literal->as<NumericLiteral>()->value());
+					sprintf(line, "scoreboard players set %s %s %d", param, call->package_name(), value.literal->as<NumericLiteral>()->value());
 					lines.push_back(line);
 					continue;
 				}
@@ -111,7 +112,8 @@ public:
 			char* invoke_cmd = (char*)malloc(128);
 			ErrorReporter::assert_or_internal_error(invoke_cmd, call->token(), "Failed to malloc");
 			assert(invoke_cmd);
-			sprintf(invoke_cmd, "function dpl:%s/invoke", target_func);
+			// FIXME: Strip the package name from target_fun
+			sprintf(invoke_cmd, "function %s:%s/invoke", call->package_name(), target_func);
 			lines.push_back(invoke_cmd);
 		}
 

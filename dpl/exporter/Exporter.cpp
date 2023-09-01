@@ -43,11 +43,20 @@ void Exporter::run(std::vector<CodeGeneratorResult> code)
 	}
 	create_directory(root_dir);
 	create_files(code);
-	std::filesystem::remove("dpl_output.zip");
+
+	char buffer[512];
+	
+	sprintf(buffer, "%s.zip", m_package_name);
+	const char* zip_file = strdup(buffer);
+
+	std::filesystem::remove(zip_file);
+
 #ifdef _WIN32
-	system("7z a dpl_output.zip ./dpl_output/* >nul");
+	sprintf(buffer, "7z a \"%s\" ./dpl_output/* >nul", zip_file);
+	system(strdup(buffer));
 #else
-	system("7z a dpl_output.zip ./dpl_output/* >/dev/null");
+	sprintf(buffer, "7z a \"%s\" ./dpl_output/* >/dev/null", zip_file);
+	system(strdup(buffer));
 #endif
 	std::filesystem::remove_all("dpl_output");
 }

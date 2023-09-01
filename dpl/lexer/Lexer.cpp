@@ -60,6 +60,20 @@ std::vector<LexerToken> Lexer::run(const char* data)
 				}
 				free(keyword);
 			}
+			if (c == 'e') {
+				char* keyword = (char*)malloc(7); // extern + null
+				ErrorReporter::assert_or_internal_error(keyword, token_offset, 1, "Failed to malloc");
+				assert(keyword);
+				strncpy(keyword, ptr, 6);
+				keyword[6] = 0;
+				if (strcmp(keyword, "extern") == 0) {
+					state = LexerState::ExternDeclaration;
+					ptr += 5;
+					free(keyword);
+					break;
+				}
+				free(keyword);
+			}
 			if (c == 0) {
 				tokens.push_back({ LexerTokenType::EndOfFile, token_offset, 1 });
 				break;
@@ -292,6 +306,31 @@ std::vector<LexerToken> Lexer::run(const char* data)
 			else {
 				ErrorReporter::report_error(token_offset, 1, "Invalid general_return_state");
 			}
+			break;
+		}
+		case LexerState::ExternDeclaration:
+		{
+			if (isspace(c)) continue;
+			size_t len = 0;
+			while (ptr[len++] != '\n') {};
+			len -= 1;
+			if (len == 0) {
+				ErrorReporter::report_error(token_offset, 1, "Extern declaration must not be empty");
+			}
+			char* decl = (char*)malloc(len + 1);
+			ErrorReporter::assert_or_internal_error(decl, token_offset, len, "Failed to malloc");
+			assert(decl);
+			strncpy(decl, ptr, len);
+			decl[len] = 0;
+
+			if (decl[len - 1] == '\r') {
+				decl[len - 1] = 0;
+			}
+
+			ptr += len;
+			state = LexerState::GlobalCode;
+			tokens.push_back({ LexerTokenType::ExternDeclaration, decl, token_offset, len });
+			ptr -= 1;
 			break;
 		}
 		case LexerState::TemplateName:

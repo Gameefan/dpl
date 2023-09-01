@@ -137,9 +137,12 @@ public:
 	void set_identifier(const char* value) { m_identifier = value; }
 	void add_param(const char* node) { m_params.push_back(node); }
 	std::vector<const char*> params() { return m_params; };
+	void set_extern(bool value) { m_extern = value; }
+	bool is_extern() { return m_extern; }
 private:
 	const char* m_identifier{};
 	std::vector<const char*> m_params{};
+	bool m_extern = false;
 	virtual void print_custom_data() override
 	{
 		printf("ident=%s params=%llu", m_identifier, m_params.size());
@@ -165,7 +168,9 @@ class FunctionCall : public Expression {
 public:
 	virtual const char* node_name() override { return "FunctionCall"; }
 	const char* callee() { return m_callee; }
-	void set_callee(const char* value) { m_callee= value; }
+	void set_callee(const char* value) { m_callee = value; }
+	const char* package_name() { return m_package_name; }
+	void set_package_name(const char* value) { m_package_name = value; }
 	struct Param {
 		const char* identifier;
 		Literal* literal;
@@ -175,9 +180,13 @@ public:
 private:
 	const char* m_callee;
 	std::vector<Param> m_params{};
+
+	// This field is set in CodeGenerator::generate_function_call()
+	const char* m_package_name = "dpl";
+
 	virtual void print_custom_data() override
 	{
-		printf("callee=%s, params=%llu", m_callee, m_params.size());
+		printf("callee=%s, params=%llu, package_name=%s", m_callee, m_params.size(), m_package_name);
 	}
 };
 

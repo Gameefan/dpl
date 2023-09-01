@@ -16,8 +16,11 @@ template template2 {
 
 $global_var = 2137; # another global comment
 
+extern external test ab cd ef
+
 function start()
 {
+	$out = external:test(1, 2, $global_var);
 	test();
 	raw
 	{
@@ -30,6 +33,7 @@ function start()
 	template1(); #another local comment
 	template2("Hello", "friends!");
 	static_loop("loop_me", 15, 123);
+	static_loop("external:test", 2, 123, 5);
 }
 
 function loop_me(loop_arg, other_arg)

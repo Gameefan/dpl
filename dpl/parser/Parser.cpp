@@ -31,6 +31,42 @@ ASTNode* Parser::run(std::vector<LexerToken> tokens)
 				token_ptr--;
 				break;
 			}
+			if (current_token->type == LexerTokenType::ExternDeclaration) {
+				char* tmp = strdup(current_token->text_value);
+				char* argv[32]{ 0 };
+				int argc = 0;
+				char* context = nullptr;
+#ifdef _WIN32
+				char* token = strtok_s(tmp, " ", &context);
+#else
+				char* token = strtok_r(tmp, " ", &context);
+#endif
+				while (token)
+				{
+					// printf(" - %s\n", token);
+					argv[argc++] = token;
+#ifdef _WIN32
+					token = strtok_s(nullptr, " ", &context);
+#else
+					token = strtok_r(nullptr, " ", &context);
+#endif
+				}
+				ErrorReporter::assert_or_error(argc >= 1, current_token, "Extern declaration requires a package name");
+				ErrorReporter::assert_or_error(argc >= 2, current_token, "Extern declaration requires a function name");
+				ErrorReporter::assert_or_internal_error(argc <= 32, current_token, "Too many arguments passed to extern declaration");
+
+				char buffer[512];
+				sprintf(buffer, "%s:%s", argv[0], argv[1]);
+
+				FunctionDeclaration* decl = create_new_dont_enter<FunctionDeclaration>(&target, current_token);
+				decl->set_extern(true);
+				decl->set_identifier(strdup(buffer));
+				for (size_t i = 2; i < argc; i++)
+				{
+					decl->add_param(argv[i]);
+				}
+				break;
+			}
 			if (current_token->type == LexerTokenType::Function) {
 				create_new<FunctionDeclaration>(&target, current_token)->set_identifier(current_token->text_value);
 				break;

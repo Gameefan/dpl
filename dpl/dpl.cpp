@@ -1,5 +1,6 @@
 ﻿#include <cstdio>
 #include <cassert>
+#include <filesystem>
 #include "preprocessor/Preprocessor.h"
 #include "lexer/Lexer.h"
 #include "utils/FileLoader.h"
@@ -53,10 +54,13 @@ int main(int argc, char** argv)
 		}
 	}
 
-	CodeGenerator* gen = new CodeGenerator();
+	std::string package_name_string = std::filesystem::path(arg_parser->file()).stem().string();
+	const char* package_name = package_name_string.c_str();
+
+	CodeGenerator* gen = new CodeGenerator(package_name);
 	std::vector<CodeGeneratorResult> code_gen_results = gen->run(root_node->as<Program>());
 
-	Exporter* exporter = new Exporter();
+	Exporter* exporter = new Exporter(package_name);
 	exporter->run(code_gen_results);
 
 	return 0;

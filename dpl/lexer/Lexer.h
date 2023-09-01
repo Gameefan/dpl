@@ -17,6 +17,7 @@ enum class LexerState
 	SelectorLiteral,
 	Semicolon,
 	FunctionName,
+	ExternDeclaration,
 	TemplateName,
 	DefinitionArguments,
 	CallArguments,
@@ -46,5 +47,5 @@ public:
 	}
 	static void dump_tokens(std::vector<LexerToken> tokens);
 private:
-	bool is_valid_identifier_character(char c) { return isalnum(c) || c == '_' || c == '.'; }
+	bool is_valid_identifier_character(char c) { return isalnum(c) || c == '_' || c == '.' || c == ':'; }
 };

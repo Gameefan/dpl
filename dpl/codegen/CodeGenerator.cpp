@@ -33,11 +33,17 @@ CodeGeneratorResult CodeGenerator::prepare_global_variables(Program* program)
 {
     std::vector<const char*> lines;
 
-    lines.push_back("scoreboard objectives remove dpl_variables");
-    lines.push_back("scoreboard objectives remove temp_variables");
+    char buffer[512]{ 0 };
 
-    lines.push_back("scoreboard objectives add dpl_variables dummy");
-    lines.push_back("scoreboard objectives add temp_variables dummy");
+    sprintf(buffer, "scoreboard objectives remove %s_dpl_vars", m_package_name);
+    lines.push_back(strdup(buffer));
+    sprintf(buffer, "scoreboard objectives remove %s_tmp_vars", m_package_name);
+    lines.push_back(strdup(buffer));
+
+    sprintf(buffer, "scoreboard objectives add %s_dpl_vars dummy", m_package_name);
+    lines.push_back(strdup(buffer));
+    sprintf(buffer, "scoreboard objectives add %s_tmp_vars dummy", m_package_name);
+    lines.push_back(strdup(buffer));
 
     for (ASTNode* child : program->children())
     {
@@ -49,11 +55,12 @@ CodeGeneratorResult CodeGenerator::prepare_global_variables(Program* program)
             assert(child->children().size() > 0);
             EvaluationResult eval = evaluate_math_expression(ass->children()[0]->as<Expression>());
             extend_vector<const char*>(&lines, &eval.lines);
-            sprintf(temp, "scoreboard players operation %s dpl_variables = %s temp_variables", ass->identifier(), eval.result_identifier);
+            sprintf(temp, "scoreboard players operation %s %s_dpl_vars = %s %s_tmp_vars", ass->identifier(), m_package_name, eval.result_identifier, m_package_name);
             lines.push_back(temp);
         }
     }
-    return { "data/dpl/functions/init.mcfunction", lines };
+    sprintf(buffer, "data/%s/functions/init.mcfunction", m_package_name);
+    return { strdup(buffer), lines };
 }
 
 EvaluationResult CodeGenerator::evaluate_math_expression(Expression* expr)
@@ -63,7 +70,7 @@ EvaluationResult CodeGenerator::evaluate_math_expression(Expression* expr)
         char* temp = (char*)malloc(64);
         ErrorReporter::assert_or_internal_error(temp, expr->token(), "Failed to malloc");
         assert(temp);
-        sprintf(temp, "scoreboard players set %s temp_variables %d", temporary_var, expr->as<NumericLiteral>()->value());
+        sprintf(temp, "scoreboard players set %s %s_tmp_vars %d", temporary_var, m_package_name, expr->as<NumericLiteral>()->value());
         return { { temp }, temporary_var };
     }
     if (expr->is<AddExpression>()) {
@@ -81,12 +88,12 @@ EvaluationResult CodeGenerator::evaluate_math_expression(Expression* expr)
         char* temp1 = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp1, expr->token(), "Failed to malloc");
         assert(temp1);
-        sprintf(temp1, "scoreboard players operation %s temp_variables = %s temp_variables", temp_var_name, res1.result_identifier);
+        sprintf(temp1, "scoreboard players operation %s %s_tmp_vars = %s %s_tmp_vars", temp_var_name, m_package_name, res1.result_identifier, m_package_name);
 
         char* temp2 = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp2, expr->token(), "Failed to malloc");
         assert(temp2);
-        sprintf(temp2, "scoreboard players operation %s temp_variables += %s temp_variables", temp_var_name, res2.result_identifier);
+        sprintf(temp2, "scoreboard players operation %s %s_tmp_vars += %s %s_tmp_vars", temp_var_name, m_package_name, res2.result_identifier, m_package_name);
 
         lines.push_back(temp1);
         lines.push_back(temp2);
@@ -108,12 +115,12 @@ EvaluationResult CodeGenerator::evaluate_math_expression(Expression* expr)
         char* temp1 = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp1, expr->token(), "Failed to malloc");
         assert(temp1);
-        sprintf(temp1, "scoreboard players operation %s temp_variables = %s temp_variables", temp_var_name, res1.result_identifier);
+        sprintf(temp1, "scoreboard players operation %s %s_tmp_vars = %s %s_tmp_vars", temp_var_name, m_package_name, res1.result_identifier, m_package_name);
 
         char* temp2 = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp2, expr->token(), "Failed to malloc");
         assert(temp2);
-        sprintf(temp2, "scoreboard players operation %s temp_variables -= %s temp_variables", temp_var_name, res2.result_identifier);
+        sprintf(temp2, "scoreboard players operation %s %s_tmp_vars -= %s %s_tmp_vars", temp_var_name, m_package_name, res2.result_identifier, m_package_name);
 
         lines.push_back(temp1);
         lines.push_back(temp2);
@@ -135,12 +142,12 @@ EvaluationResult CodeGenerator::evaluate_math_expression(Expression* expr)
         char* temp1 = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp1, expr->token(), "Failed to malloc");
         assert(temp1);
-        sprintf(temp1, "scoreboard players operation %s temp_variables = %s temp_variables", temp_var_name, res1.result_identifier);
+        sprintf(temp1, "scoreboard players operation %s %s_tmp_vars = %s %s_tmp_vars", temp_var_name, m_package_name, res1.result_identifier, m_package_name);
 
         char* temp2 = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp2, expr->token(), "Failed to malloc");
         assert(temp2);
-        sprintf(temp2, "scoreboard players operation %s temp_variables *= %s temp_variables", temp_var_name, res2.result_identifier);
+        sprintf(temp2, "scoreboard players operation %s %s_tmp_vars *= %s %s_tmp_vars", temp_var_name, m_package_name, res2.result_identifier, m_package_name);
 
         lines.push_back(temp1);
         lines.push_back(temp2);
@@ -162,12 +169,12 @@ EvaluationResult CodeGenerator::evaluate_math_expression(Expression* expr)
         char* temp1 = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp1, expr->token(), "Failed to malloc");
         assert(temp1);
-        sprintf(temp1, "scoreboard players operation %s temp_variables = %s temp_variables", temp_var_name, res1.result_identifier);
+        sprintf(temp1, "scoreboard players operation %s %s_tmp_vars = %s %s_tmp_vars", temp_var_name, m_package_name, res1.result_identifier, m_package_name);
 
         char* temp2 = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp2, expr->token(), "Failed to malloc");
         assert(temp2);
-        sprintf(temp2, "scoreboard players operation %s temp_variables /= %s temp_variables", temp_var_name, res2.result_identifier);
+        sprintf(temp2, "scoreboard players operation %s %s_tmp_vars /= %s %s_tmp_vars", temp_var_name, m_package_name, res2.result_identifier, m_package_name);
 
         lines.push_back(temp1);
         lines.push_back(temp2);
@@ -189,12 +196,12 @@ EvaluationResult CodeGenerator::evaluate_math_expression(Expression* expr)
         char* temp1 = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp1, expr->token(), "Failed to malloc");
         assert(temp1);
-        sprintf(temp1, "scoreboard players operation %s temp_variables = %s temp_variables", temp_var_name, res1.result_identifier);
+        sprintf(temp1, "scoreboard players operation %s %s_tmp_vars = %s %s_tmp_vars", temp_var_name, m_package_name, res1.result_identifier, m_package_name);
 
         char* temp2 = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp2, expr->token(), "Failed to malloc");
         assert(temp2);
-        sprintf(temp2, "scoreboard players operation %s temp_variables %= %s temp_variables", temp_var_name, res2.result_identifier);
+        sprintf(temp2, "scoreboard players operation %s %s_tmp_vars %= %s %s_tmp_vars", temp_var_name, m_package_name, res2.result_identifier, m_package_name);
 
         lines.push_back(temp1);
         lines.push_back(temp2);
@@ -217,7 +224,7 @@ EvaluationResult CodeGenerator::evaluate_math_expression(Expression* expr)
         char* temp = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp, expr->token(), "Failed to malloc");
         assert(temp);
-        sprintf(temp, "execute if score %s temp_variables > %s temp_variables run scoreboard players set %s temp_variables 1", res1.result_identifier, res2.result_identifier, temp_var_name);
+        sprintf(temp, "execute if score %s %s_tmp_vars > %s %s_tmp_vars run scoreboard players set %s %s_tmp_vars 1", res1.result_identifier, m_package_name, res2.result_identifier, m_package_name, temp_var_name, m_package_name);
 
         lines.push_back(clear_temp_var(temp_var_name));
         lines.push_back(temp);
@@ -240,7 +247,7 @@ EvaluationResult CodeGenerator::evaluate_math_expression(Expression* expr)
         char* temp = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp, expr->token(), "Failed to malloc");
         assert(temp);
-        sprintf(temp, "execute if score %s temp_variables >= %s temp_variables run scoreboard players set %s temp_variables 1", res1.result_identifier, res2.result_identifier, temp_var_name);
+        sprintf(temp, "execute if score %s %s_tmp_vars >= %s %s_tmp_vars run scoreboard players set %s %s_tmp_vars 1", res1.result_identifier, m_package_name, res2.result_identifier, m_package_name, temp_var_name, m_package_name);
 
         lines.push_back(clear_temp_var(temp_var_name));
         lines.push_back(temp);
@@ -263,7 +270,7 @@ EvaluationResult CodeGenerator::evaluate_math_expression(Expression* expr)
         char* temp = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp, expr->token(), "Failed to malloc");
         assert(temp);
-        sprintf(temp, "execute if score %s temp_variables < %s temp_variables run scoreboard players set %s temp_variables 1", res1.result_identifier, res2.result_identifier, temp_var_name);
+        sprintf(temp, "execute if score %s %s_tmp_vars < %s %s_tmp_vars run scoreboard players set %s %s_tmp_vars 1", res1.result_identifier, m_package_name, res2.result_identifier, m_package_name, temp_var_name, m_package_name);
 
         lines.push_back(clear_temp_var(temp_var_name));
         lines.push_back(temp);
@@ -286,7 +293,7 @@ EvaluationResult CodeGenerator::evaluate_math_expression(Expression* expr)
         char* temp = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp, expr->token(), "Failed to malloc");
         assert(temp);
-        sprintf(temp, "execute if score %s temp_variables <= %s temp_variables run scoreboard players set %s temp_variables 1", res1.result_identifier, res2.result_identifier, temp_var_name);
+        sprintf(temp, "execute if score %s %s_tmp_vars <= %s %s_tmp_vars run scoreboard players set %s %s_tmp_vars 1", res1.result_identifier, m_package_name, res2.result_identifier, m_package_name, temp_var_name, m_package_name);
 
         lines.push_back(clear_temp_var(temp_var_name));
         lines.push_back(temp);
@@ -309,7 +316,7 @@ EvaluationResult CodeGenerator::evaluate_math_expression(Expression* expr)
         char* temp = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp, expr->token(), "Failed to malloc");
         assert(temp);
-        sprintf(temp, "execute if score %s temp_variables = %s temp_variables run scoreboard players set %s temp_variables 1", res1.result_identifier, res2.result_identifier, temp_var_name);
+        sprintf(temp, "execute if score %s %s_tmp_vars = %s %s_tmp_vars run scoreboard players set %s %s_tmp_vars 1", res1.result_identifier, m_package_name, res2.result_identifier, m_package_name, temp_var_name, m_package_name);
 
         lines.push_back(clear_temp_var(temp_var_name));
         lines.push_back(temp);
@@ -332,7 +339,7 @@ EvaluationResult CodeGenerator::evaluate_math_expression(Expression* expr)
         char* temp = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp, expr->token(), "Failed to malloc");
         assert(temp);
-        sprintf(temp, "execute unless score %s temp_variables = %s temp_variables run scoreboard players set %s temp_variables 1", res1.result_identifier, res2.result_identifier, temp_var_name);
+        sprintf(temp, "execute unless score %s %s_tmp_vars = %s %s_tmp_vars run scoreboard players set %s %s_tmp_vars 1", res1.result_identifier, m_package_name, res2.result_identifier, m_package_name, temp_var_name, m_package_name);
 
         lines.push_back(clear_temp_var(temp_var_name));
         lines.push_back(temp);
@@ -346,7 +353,7 @@ EvaluationResult CodeGenerator::evaluate_math_expression(Expression* expr)
         char* temp = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp, expr->token(), "Failed to malloc");
         assert(temp);
-        sprintf(temp, "scoreboard players operation %s temp_variables = %s dpl_variables", temp_var_name, var_ref->identifier());
+        sprintf(temp, "scoreboard players operation %s %s_tmp_vars = %s %s_dpl_vars", temp_var_name, m_package_name, var_ref->identifier(), m_package_name);
 
         return { { temp }, temp_var_name };
     }
@@ -360,7 +367,8 @@ EvaluationResult CodeGenerator::evaluate_math_expression(Expression* expr)
         char* temp = (char*)malloc(512);
         ErrorReporter::assert_or_internal_error(temp, expr->token(), "Failed to malloc");
         assert(temp);
-        sprintf(temp, "scoreboard players operation %s temp_variables = __yield__ dpl_variables", temp_var_name);
+        // I think (hopefully I am correct) that this field is set already after generate_function_call() sets it
+        sprintf(temp, "scoreboard players operation %s %s_tmp_vars = __yield__ %s_dpl_vars", temp_var_name, m_package_name, expr->as<FunctionCall>()->package_name());
 
         lines.push_back(temp);
 
@@ -423,9 +431,12 @@ std::vector<CodeGeneratorResult> CodeGenerator::prepare_standard_files()
             std::vector<const char*> lines = {};
             lines.push_back("{");
             lines.push_back("\"values\":[");
-            lines.push_back("\"dpl:init\"");
+            char buffer[512]{0};
+            sprintf(buffer, "\"%s:init\"", m_package_name);
+            lines.push_back(strdup(buffer));
             if (function_info_from_identifier("start")) {
-                lines.push_back(",\"dpl:start/invoke\"");
+                sprintf(buffer, ",\"%s:start/invoke\"", m_package_name);
+                lines.push_back(strdup(buffer));
             }
             lines.push_back("]");
             lines.push_back("}");
@@ -436,7 +447,9 @@ std::vector<CodeGeneratorResult> CodeGenerator::prepare_standard_files()
         std::vector<const char*> lines = {};
         lines.push_back("{");
         lines.push_back("\"values\":[");
-        lines.push_back("\"dpl:tick/invoke\"");
+        char buffer[512]{ 0 };
+        sprintf(buffer, "\"%s:tick/invoke\"", m_package_name);
+        lines.push_back(strdup(buffer));
         lines.push_back("]");
         lines.push_back("}");
         CodeGeneratorResult tick_tag = { "data/minecraft/tags/functions/tick.json", lines, false };
@@ -470,9 +483,11 @@ std::vector<CodeGeneratorResult> CodeGenerator::generate_functions(Program* prog
 
 std::vector<CodeGeneratorResult> CodeGenerator::generate_function_declaration(FunctionDeclaration* decl)
 {
+    if (decl->is_extern()) return {};
+
     char* path = (char*)malloc(256);
     assert(path);
-    sprintf(path, "data/dpl/functions/%s/invoke.mcfunction", decl->identifier());
+    sprintf(path, "data/%s/functions/%s/invoke.mcfunction", m_package_name, decl->identifier());
     std::vector<const char*> lines{};
 
     std::vector<CodeGeneratorResult> ret{};
@@ -503,7 +518,7 @@ std::vector<CodeGeneratorResult> CodeGenerator::generate_function_declaration(Fu
 
             char* line = (char*)malloc(128);
             assert(line);
-            sprintf(line, "execute if score %s temp_variables matches 1 run function dpl:%s/%s", res.result_identifier, decl->identifier(), generate_name_for_block(if_stat));
+            sprintf(line, "execute if score %s %s_tmp_vars matches 1 run function %s:%s/%s", res.result_identifier, m_package_name, m_package_name, decl->identifier(), generate_name_for_block(if_stat));
             lines.push_back(line);
             continue;
         }
@@ -520,7 +535,7 @@ std::vector<CodeGeneratorResult> CodeGenerator::generate_function_declaration(Fu
 
             char* line = (char*)malloc(128);
             assert(line);
-            sprintf(line, "execute unless score %s temp_variables matches 1 run function dpl:%s/%s", res.result_identifier, decl->identifier(), generate_name_for_block(unless_stat));
+            sprintf(line, "execute unless score %s %s_tmp_vars matches 1 run function %s:%s/%s", res.result_identifier, m_package_name, m_package_name, decl->identifier(), generate_name_for_block(unless_stat));
             lines.push_back(line);
             continue;
         }
@@ -540,7 +555,7 @@ std::vector<CodeGeneratorResult> CodeGenerator::generate_function_declaration(Fu
             char* line = (char*)malloc(128);
             ErrorReporter::assert_or_internal_error(line, child->token(), "Failed to malloc");
             assert(line);
-            sprintf(line, "scoreboard players operation __yield__ dpl_variables = %s temp_variables", res.result_identifier);
+            sprintf(line, "scoreboard players operation __yield__ %s_dpl_vars = %s %s_tmp_vars", res.result_identifier, m_package_name, m_package_name);
 
             lines.push_back(line);
             continue;
@@ -568,7 +583,7 @@ std::vector<CodeGeneratorResult> CodeGenerator::generate_block(ASTNode* block_pa
         parent_function = target->as<FunctionDeclaration>();
     }
 
-    sprintf(path, "data/dpl/functions/%s/%s.mcfunction", parent_function->identifier(), block_name);
+    sprintf(path, "data/%s/functions/%s/%s.mcfunction", m_package_name, parent_function->identifier(), block_name);
 
     std::vector<const char*> lines{};
     std::vector<CodeGeneratorResult> ret{};
@@ -601,7 +616,7 @@ std::vector<CodeGeneratorResult> CodeGenerator::generate_block(ASTNode* block_pa
             char* line = (char*)malloc(128);
             ErrorReporter::assert_or_internal_error(line, child->token(), "Failed to malloc");
             assert(line);
-            sprintf(line, "execute if score %s temp_variables matches 1 run function dpl:%s/%s", res.result_identifier, parent_function->identifier(), generate_name_for_block(if_stat));
+            sprintf(line, "execute if score %s %s_tmp_vars matches 1 run function %s:%s/%s", res.result_identifier, m_package_name, m_package_name, parent_function->identifier(), generate_name_for_block(if_stat));
             lines.push_back(line);
             continue;
         }
@@ -619,7 +634,7 @@ std::vector<CodeGeneratorResult> CodeGenerator::generate_block(ASTNode* block_pa
             char* line = (char*)malloc(128);
             ErrorReporter::assert_or_internal_error(line, child->token(), "Failed to malloc");
             assert(line);
-            sprintf(line, "execute unless score %s temp_variables matches 1 run function dpl:%s/%s", res.result_identifier, parent_function->identifier(), generate_name_for_block(unless_stat));
+            sprintf(line, "execute unless score %s %s_tmp_vars matches 1 run function %s:%s/%s", res.result_identifier, m_package_name, m_package_name, parent_function->identifier(), generate_name_for_block(unless_stat));
             lines.push_back(line);
             continue;
         }
@@ -639,7 +654,7 @@ std::vector<CodeGeneratorResult> CodeGenerator::generate_block(ASTNode* block_pa
             char* line = (char*)malloc(128);
             ErrorReporter::assert_or_internal_error(line, child->token(), "Failed to malloc");
             assert(line);
-            sprintf(line, "scoreboard players operation __yield__ dpl_variables = %s temp_variables", res.result_identifier);
+            sprintf(line, "scoreboard players operation __yield__ %s_dpl_vars = %s %s_tmp_vars", m_package_name, res.result_identifier, m_package_name);
 
             lines.push_back(line);
             continue;
@@ -655,6 +670,29 @@ std::vector<CodeGeneratorResult> CodeGenerator::generate_block(ASTNode* block_pa
 std::vector<const char*> CodeGenerator::generate_function_call(FunctionCall* call)
 {
     std::vector<const char*> lines{};
+
+    int separator_index = -1;
+    for (size_t i = 0; i < strlen(call->callee()); i++)
+    {
+        if (call->callee()[i] == ':') {
+            separator_index = i;
+            break;
+        }
+    }
+
+    bool has_package_name = separator_index >= 0;
+    char buffer[512]{ 0 };
+    if(has_package_name)
+        strncpy(buffer, call->callee(), separator_index);
+    const char* callee_package = strdup(buffer);
+    const char* callee_name = call->callee() + (has_package_name ? separator_index + 1 : 0);
+
+    if (has_package_name) {
+        call->set_package_name(callee_package);
+    }
+    else {
+        call->set_package_name(m_package_name);
+    }
 
     if (strcmp(call->callee(), "print") == 0)
     {
@@ -707,7 +745,8 @@ std::vector<const char*> CodeGenerator::generate_function_call(FunctionCall* cal
             char* line = (char*)malloc(64);
             ErrorReporter::assert_or_internal_error(line, call->token(), "Failed to malloc");
             assert(line);
-            sprintf(line, "scoreboard players operation %s dpl_variables = %s dpl_variables", param, value.identifier);
+            // callee package space
+            sprintf(line, "scoreboard players operation %s %s_dpl_vars = %s %s_dpl_vars", param, call->package_name(), value.identifier, m_package_name);
             lines.push_back(line);
             continue;
         }
@@ -716,7 +755,8 @@ std::vector<const char*> CodeGenerator::generate_function_call(FunctionCall* cal
             char* line = (char*)malloc(64);
             ErrorReporter::assert_or_internal_error(line, call->token(), "Failed to malloc");
             assert(line);
-            sprintf(line, "scoreboard players set %s dpl_variables %d", param, value.literal->as<NumericLiteral>()->value());
+            // callee package space
+            sprintf(line, "scoreboard players set %s %s_dpl_vars %d", param, call->package_name(), value.literal->as<NumericLiteral>()->value());
             lines.push_back(line);
             continue;
         }
@@ -728,7 +768,7 @@ std::vector<const char*> CodeGenerator::generate_function_call(FunctionCall* cal
     char* invoke_cmd = (char*)malloc(128);
     ErrorReporter::assert_or_internal_error(invoke_cmd, call->token(), "Failed to malloc");
     assert(invoke_cmd);
-    sprintf(invoke_cmd, "function dpl:%s/invoke", call->callee());
+    sprintf(invoke_cmd, "function %s:%s/invoke", call->package_name(), callee_name);
     lines.push_back(invoke_cmd);
 
     return lines;
@@ -753,7 +793,7 @@ std::vector<const char*> CodeGenerator::generate_assignment_expression(Assignmen
 
     EvaluationResult res = evaluate_math_expression(expr->children()[0]->as<Expression>());
     std::vector<const char*> lines{};
-    sprintf(line, "scoreboard players operation %s dpl_variables = %s temp_variables", expr->identifier(), res.result_identifier);
+    sprintf(line, "scoreboard players operation %s %s_dpl_vars = %s %s_tmp_vars", expr->identifier(), m_package_name, res.result_identifier, m_package_name);
 
     extend_vector<const char*>(&lines, &res.lines);
     lines.push_back(line);
@@ -881,6 +921,6 @@ const char* CodeGenerator::clear_temp_var(const char* var)
     char* temp = (char*)malloc(128);
     ErrorReporter::assert_or_internal_error(temp, nullptr, "Failed to malloc");
     assert(temp);
-    sprintf(temp, "scoreboard players reset %s temp_variables", var);
+    sprintf(temp, "scoreboard players reset %s %s_tmp_vars", var, m_package_name);
     return temp;
 }

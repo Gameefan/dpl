@@ -37,6 +37,9 @@ struct FunctionInformation {
 class CodeGenerator {
 public:
 	std::vector<CodeGeneratorResult> run(Program* root_node);
+	CodeGenerator(const char* package_name)
+		: m_package_name(package_name)
+	{}
 private:
 	CodeGeneratorResult prepare_global_variables(Program* program);
 	EvaluationResult evaluate_math_expression(Expression* expr);
@@ -55,4 +58,6 @@ private:
 	std::vector<const char*> generate_raw_statement(RawStatement* raw);
 	void prepare_notice(std::vector<CodeGeneratorResult>& files);
 	const char* clear_temp_var(const char* var);
+
+	const char* m_package_name = "dpl";
 };

@@ -120,7 +120,7 @@ Preprocessor::PreprocessorParsingResult Preprocessor::parse_preprocessor_instruc
 #endif
 	while (token)
 	{
-		//printf(" - %s\n", token);
+		// printf(" - %s\n", token);
 		argv[argc++] = token;
 #ifdef _WIN32
 		token = strtok_s(nullptr, " ", &context);
